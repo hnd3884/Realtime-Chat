@@ -7,6 +7,7 @@ import * as Config from './Config';
 import * as websocket from 'websocket';
 import { UserStoreInstance } from './Stores/UserStore'
 import { MessageStoreInstance } from './Stores/MessageStore'
+import mongoose from './DbConnection/MongoConnection'
 
 const server = http.createServer();
 
@@ -25,7 +26,7 @@ webSocketServer.on('connect', function (socket) {
             UserStoreInstance.CheckUser(data.username, data.password).then(async (item) => {
                 if (item) {
                     var messHistory;
-                    await MessageStoreInstance.GetAllMessage().then(item =>{
+                    await MessageStoreInstance.GetAllMessage().then(item => {
                         messHistory = item;
                     })
                     socket.send(JSON.stringify({
@@ -48,11 +49,33 @@ webSocketServer.on('connect', function (socket) {
                 }));
             });
         }
-        // webSocketServer.connections.forEach(function each(client) {
-        //     if (client !== socket && client.connected) {
-        //         client.send(message.utf8Data);
-        //     }
-        // })
+        else if (data.statuscode === Config.CHAT_CODE) {
+            /*
+                statuscode: '01'
+                userId: '5f0de9a6b9afef7e7fb5b16d'
+                message: 'hi from hoangnd'
+            */
+            var messageData = {
+                message: data.message,
+                time: new Date(),
+                authorId: data.userId,
+            }
+
+            UserStoreInstance.GetUserById(data.userId).then(async item => {
+                messageData["username"] = item["username"];
+                messageData["_id"] = mongoose.Types.ObjectId();
+                MessageStoreInstance.AddMessage(messageData);
+
+                webSocketServer.connections.forEach(client => {
+                    if(client.connected){
+                        client.send(JSON.stringify({
+                            statuscode: Config.CHAT_CODE,
+                            data: messageData
+                        }));
+                    }
+                })
+            })
+        }
     })
 
     socket.on('close', function () {

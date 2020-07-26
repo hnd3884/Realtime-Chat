@@ -24,19 +24,21 @@ class App extends Component {
     client.onmessage = (message) => {
       var messJSON = JSON.parse(message.data);
       //console.log(messJSON);
-      switch (messJSON.statuscode) {
-        case Config.LOGIN_CODE_SUCCESS:
-          if (this.state.isLogin === false) {
-            this.setState({
-              isLogin: true,
-              userDetail: messJSON.userDetail,
-              messHistory: messJSON.messHistory
-            })
-          }
-          break;
-        case Config.CHAT_CODE:
-          break;
-        default: break;
+      if (messJSON.statuscode === Config.LOGIN_CODE_SUCCESS) {
+        if (this.state.isLogin === false) {
+          this.setState({
+            isLogin: true,
+            userDetail: messJSON.userDetail,
+            messHistory: messJSON.messHistory
+          })
+        }
+      }
+      else if (messJSON.statuscode === Config.CHAT_CODE) {
+        let currentMess = this.state.messHistory;
+        currentMess.push(messJSON.data)
+        this.setState({
+          messHistory: currentMess
+        })
       }
     };
     client.onclose = () => {
@@ -54,9 +56,24 @@ class App extends Component {
     event.preventDefault();
   }
 
+  CommitMessage = (message) => {
+    client.send(JSON.stringify({
+      statuscode: Config.CHAT_CODE,
+      userId: this.state.userDetail._id,
+      message: message
+    }));
+  }
+
   render() {
     return this.state.isLogin ?
-      <ChatContainer messHistory={this.state.messHistory} username={this.state.userDetail.username}></ChatContainer> : <LoginForm login={this.Login}></LoginForm>;
+      <ChatContainer
+        messHistory={this.state.messHistory}
+        username={this.state.userDetail.username}
+        commitMessage={this.CommitMessage}
+      >
+      </ChatContainer>
+      :
+      <LoginForm login={this.Login}></LoginForm>;
   }
 }
 

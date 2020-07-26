@@ -10,6 +10,14 @@ class UserStore {
             console.log(error);
         }
     }
+
+    async GetUserById(id){
+        try {
+            return await User.findById(id).exec();
+        } catch (error) {
+            console.log(error);
+        }
+    }
 }
 
 export const UserStoreInstance =  new UserStore();

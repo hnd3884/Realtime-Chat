@@ -10,6 +10,18 @@ class MessageStore {
             console.log(error);
         }
     }
+
+    // Add new message
+    async AddMessage(messageData){
+        try {
+            let newMessage = new Message(messageData);
+            return await newMessage.save(function (err) {
+                if (err) console.log(err);
+            })
+        } catch (error) {
+            console.log(error);
+        }
+    }
 }
 
 export const MessageStoreInstance =  new MessageStore();

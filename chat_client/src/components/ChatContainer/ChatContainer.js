@@ -7,8 +7,40 @@ class ChatContainer extends Component {
     super(props);
     this.state = {
       username: props.username,
-      messHistory: props.messHistory
+      messHistory: props.messHistory,
+      messageCommit: ""
     }
+  }
+
+  componentDidMount() {
+    this.UpdateScroll();
+  }
+
+  UpdateScroll() {
+    let element = document.getElementById("msghistory");
+    element.scrollTop = element.scrollHeight;
+  }
+
+  componentDidUpdate() {
+    this.UpdateScroll();
+  }
+
+  UNSAFE_componentWillReceiveProps(newProps) {
+    if (this.state.messHistory !== newProps.messHistory) {
+      this.setState({ messHistory: newProps.messHistory });
+    }
+  }
+
+  ChangeMessageCommit(event) {
+    this.setState({ messageCommit: event.target.value });
+  }
+
+  CommitMessage(event) {
+    this.props.commitMessage(this.state.messageCommit);
+    this.setState({
+      messageCommit: ""
+    })
+    event.preventDefault();
   }
 
   render() {
@@ -50,7 +82,7 @@ class ChatContainer extends Component {
             <div className="mesgs">
 
               {/*--- Mess history ---*/}
-              <div className="msg_history">
+              <div className="msg_history" id="msghistory">
                 {
                   this.state.messHistory.map((value, index) => {
                     return (
@@ -72,8 +104,12 @@ class ChatContainer extends Component {
 
                 {/*--- Mess input field ---*/}
                 <div className="input_msg_write">
-                  <input type="text" className="write_msg" placeholder="Type a message" />
-                  <button className="msg_send_btn" type="button"><i className="fa fa-paper-plane-o" aria-hidden="true"></i></button>
+                  <form>
+                    <input type="text" value={this.state.messageCommit} className="write_msg" placeholder="Type a message" onChange={this.ChangeMessageCommit.bind(this)} />
+                    <button className="msg_send_btn" type="submit" onClick={(e) => this.CommitMessage(e)}>
+                      <i className="fa fa-paper-plane-o" aria-hidden="true"></i>
+                    </button>
+                  </form>
                 </div>
                 {/*--- End mess input field ---*/}
 

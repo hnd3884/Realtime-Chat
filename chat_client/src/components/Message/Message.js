@@ -5,12 +5,13 @@ class Message extends Component {
     constructor(props) {
         super(props);
         var date = new Date(this.props.time);
-        var dateString = date.getHours() + ":" + date.getMinutes() + " | " + 
+        var dateString = ("0"+date.getHours()).slice(-2) + ":" + ("0"+date.getMinutes()).slice(-2) + " | " + 
             Config.MONTH_NAME[date.getMonth()] + " " + date.getDate()+" "+date.getFullYear();
         this.state = {
             date: dateString
         }
     }
+    
     render() {
         if (this.props.isUser) {
             return (
